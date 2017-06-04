@@ -2,6 +2,7 @@ package www.v_world.com.v_world_weather02;
 
 import android.app.Fragment;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -105,7 +106,18 @@ public class AreaFragmentActivity extends Fragment {
                     queryCities();
                 } else if (currentLevel == LEVEL_CITY) {
                     selectedCity = cityList.get(position);
+
                     queryCounties();
+                    Log.e("----currentLevel----", ""+currentLevel);
+                }else if(currentLevel == LEVEL_COUNTY){
+                    String wetherId = countyList.get(position).getWeatherId();
+                   Log.e("-------wetherId-------", ""+wetherId);
+                    Intent intent = new Intent(getActivity(),WeatherActivity.class);
+                    intent.putExtra("weather_id",wetherId);
+                    startActivity(intent);
+                    getActivity().finish();
+
+
                 }
             }
         });
@@ -155,7 +167,7 @@ public class AreaFragmentActivity extends Fragment {
 
         cityList = DataSupport.where("provinceId = ?", String.valueOf(selectedProvince.getId())).find(City.class);
 
-        Log.e("MyLog",""+cityList.size());
+        Log.e("----cityList---",""+cityList);
 
         if(cityList.size() > 0){
             dataList.clear();
@@ -165,11 +177,12 @@ public class AreaFragmentActivity extends Fragment {
             adapter.notifyDataSetChanged();
             listView.setSelection(0);
             currentLevel = LEVEL_CITY;
+            Log.e("--City---",""+currentLevel);
 
         }else {
             int provinceCode = selectedProvince.getProvinceCode();
 
-            Log.e("MyLog","---"+provinceCode);
+
             String address = "http://guolin.tech/api/china/" + provinceCode;
 
             queryFromServer(address, "city");
@@ -183,18 +196,22 @@ public class AreaFragmentActivity extends Fragment {
         titleText.setText(selectedCity.getCityName());
         backButton.setVisibility(View.VISIBLE);
         countyList = DataSupport.where("cityId = ?", String.valueOf(selectedCity.getId())).find(County.class);
+        Log.e("countyList",""+countyList);
+
         if(countyList.size() > 0) {
             dataList.clear();
             for (County county : countyList) {
                 dataList.add(county.getCountyName());
-                adapter.notifyDataSetChanged();
-                listView.setSelection(0);
-                currentLevel = LEVEL_COUNTY;
             }
+
+            adapter.notifyDataSetChanged();
+            listView.setSelection(0);
+            currentLevel = LEVEL_COUNTY;
+            Log.e("---currevel----", ""+currentLevel);
         }else{
                 int provinceCode = selectedProvince.getProvinceCode();
                 int cityCode = selectedCity.getCityCode();
-                Log.e("myLog",""+provinceCode+"---"+cityCode);
+
                 String address = "http://guolin.tech/api/china/" + provinceCode + "/"  + cityCode;
                 queryFromServer(address, "county");
             }

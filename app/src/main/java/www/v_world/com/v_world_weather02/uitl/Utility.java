@@ -2,6 +2,8 @@ package www.v_world.com.v_world_weather02.uitl;
 
 import android.text.TextUtils;
 
+import com.google.gson.Gson;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -11,6 +13,7 @@ import java.security.PublicKey;
 import www.v_world.com.v_world_weather02.db.City;
 import www.v_world.com.v_world_weather02.db.County;
 import www.v_world.com.v_world_weather02.db.Province;
+import www.v_world.com.v_world_weather02.gson.Weather;
 
 /**
  * Created by Administrator on 2017/6/1.
@@ -116,6 +119,22 @@ public class Utility  {
         return  false;
 
     }
+
+
+    public static Weather handleWeatherResponse(String response){
+
+        try{
+            JSONObject jsonObject = new JSONObject(response);
+            JSONArray jsonArray = jsonObject.getJSONArray("HeWeather");
+            String weatherContent = jsonArray.getJSONObject(0).toString();
+            return  new Gson().fromJson(weatherContent, Weather.class);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+
+    }
+
 }
 
 

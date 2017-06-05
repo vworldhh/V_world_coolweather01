@@ -110,10 +110,10 @@ public class AreaFragmentActivity extends Fragment {
                     queryCounties();
                     Log.e("----currentLevel----", ""+currentLevel);
                 }else if(currentLevel == LEVEL_COUNTY){
-                    String wetherId = countyList.get(position).getWeatherId();
-                   Log.e("-------wetherId-------", ""+wetherId);
+                    String weatherId = countyList.get(position).getWeatherId();
+                   Log.e("-------wetherId-------", ""+weatherId);
                     Intent intent = new Intent(getActivity(),WeatherActivity.class);
-                    intent.putExtra("weather_id",wetherId);
+                    intent.putExtra("weather_id",weatherId);
                     startActivity(intent);
                     getActivity().finish();
 

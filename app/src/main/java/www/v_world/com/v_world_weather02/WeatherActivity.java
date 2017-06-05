@@ -7,10 +7,13 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.bumptech.glide.Glide;
 
 import java.io.IOException;
 
@@ -34,7 +37,7 @@ public class WeatherActivity extends AppCompatActivity {
     private TextView comfortText;
     private TextView carWashText;
     private TextView sportText;
-
+    private ImageView bingPicImg;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,25 +45,41 @@ public class WeatherActivity extends AppCompatActivity {
 
         //初始化控件
         init();
+        String weatherId = getIntent().getStringExtra("weather_id");
+        requestWeather(weatherId);
+        getImage();//获取图片
+//        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+//        //缓存为空
+//        emptyPre();
+//        String weatherString = prefs.getString("weather",null);
+//
+//         requestWeather(weatherId);
+//        if(weatherString != null){
+//            //有缓存是直接解析天气数据
+//
+//            Log.e("weatherString",weatherString);
+//
+//        }else{
+//
+//            Log.e("tringExtra(weather_id", ""+weatherId);
+//            weatherLayout.setVisibility(View.INVISIBLE);
+//            requestWeather(weatherId);
+//            Weather weather = Utility.handleWeatherResponse(weatherString);
+//            showWeatherInfo(weather);
+//
+//        }
+    }
 
+
+    private void emptyPre(){   //清空缓存为空
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        String weatherString = prefs.getString("weather",null);
-        if(weatherString != null){
-            //有缓存是直接解析天气数据
-            Weather weather = Utility.handleWeatherResponse(weatherString);
-            showWeatherInfo(weather);
-        }else{
-            String weatherId = getIntent().getStringExtra("weather_id");
-            Log.e("tringExtra(weather_id", ""+weatherId);
-            weatherLayout.setVisibility(View.INVISIBLE);
-            requestWeather(weatherId);
-        }
+        prefs.edit().putString("weather",null).commit();
     }
     private void init(){
         weatherLayout =(ScrollView)findViewById(R.id.weather_layout_01);
         titleCity =(TextView)findViewById(R.id.title_city);
         titleUpdateTime = (TextView)findViewById(R.id.title_update_time);
-        degreeText = (TextView)findViewById(R.id.data_text);
+        degreeText = (TextView)findViewById(R.id.degree_text);
         weatherInfoText= (TextView)findViewById(R.id.weather_info_text);
         forecastLayout =(LinearLayout)findViewById(R.id.forecast_layout);
         aqiText = (TextView)findViewById(R.id.aqi_text);
@@ -68,8 +87,22 @@ public class WeatherActivity extends AppCompatActivity {
         comfortText =(TextView) findViewById(R.id.comfort_text);
         carWashText = (TextView) findViewById(R.id.car_wash_text);
         sportText = (TextView) findViewById(R.id.sport_text);
+        bingPicImg = (ImageView) findViewById(R.id.bing_pic_img);
 
     }
+
+    /**
+     * 获取图片
+     */
+    public  void getImage(){
+//     getImage   SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+//        String bingPic = prefs.getString("bing_pic",null);
+//        if(bingPic != null){
+//
+//        }
+        loadBingPic();
+    }
+
 
     /**
      * 根据天气ID求城市天气信息
@@ -77,7 +110,7 @@ public class WeatherActivity extends AppCompatActivity {
      */
     public void requestWeather(final  String weatherId){
        // http://guolin.tech/api/weather?cityid=CN101190407&key=10c5e10a8e574bd2ae1b591b8969fe22
-        Log.e("weatherId", ""+weatherId);
+        Log.e("======weatherId=====", ""+weatherId);
         String WeatherURL = "http://guolin.tech/api/weather?cityid="+weatherId +"&key=10c5e10a8e574bd2ae1b591b8969fe22";
 
 
@@ -109,6 +142,8 @@ public class WeatherActivity extends AppCompatActivity {
                                     .edit();
                             editor.putString("weather", responseText);
                             editor.apply();
+
+
                             showWeatherInfo(weather);
 
                         }else{
@@ -117,6 +152,36 @@ public class WeatherActivity extends AppCompatActivity {
                         }
                     }
                 });
+            }
+        });
+        loadBingPic();
+    }
+
+
+    /**
+     * 每日一图
+     */
+
+    private void loadBingPic(){
+        String requestBingPic = "http://guolin.tech/api/bing_pic";
+        HttpUtil.sendOkHttpRequest(requestBingPic, new Callback() {
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                final String responseText = response.body().string();
+                SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this).edit();
+                editor.putString("bing_pic", responseText);
+                editor.apply();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Glide.with(WeatherActivity.this).load(responseText).into(bingPicImg);
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
             }
         });
     }
@@ -136,10 +201,10 @@ public class WeatherActivity extends AppCompatActivity {
         for(Forecast forecast : weather.forecastList){
 
             View view = LayoutInflater.from(this).inflate(R.layout.forecast_ietm, forecastLayout, false);
-            TextView dateText = (TextView) findViewById(R.id.data_text);
-            TextView infoText = (TextView) findViewById(R.id.info_text);
-            TextView maxText = (TextView) findViewById(R.id.max_text);
-            TextView minText = (TextView) findViewById(R.id.min_text);
+            TextView dateText = (TextView) view.findViewById(R.id.data_text);
+            TextView infoText = (TextView) view.findViewById(R.id.info_text);
+            TextView maxText = (TextView) view.findViewById(R.id.max_text);
+            TextView minText = (TextView) view.findViewById(R.id.min_text);
             dateText.setText(forecast.date);
             infoText.setText(forecast.more.info);
             maxText.setText(forecast.temperature.max);
@@ -150,8 +215,6 @@ public class WeatherActivity extends AppCompatActivity {
         if(weather.aqi != null){
             aqiText.setText(weather.aqi.city.aqi);
             pm25Text.setText(weather.aqi.city.pm25);
-
-
         }
         String comfort = "舒适度：" + weather.suggestion.comfort.info;
         String carWash = "洗车指数："+weather.suggestion.carWash.info;

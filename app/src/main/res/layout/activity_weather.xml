@@ -11,35 +11,62 @@
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
         />
-
-    <ScrollView
-        android:id="@+id/weather_layout_01"
+    <android.support.v4.widget.DrawerLayout
+      android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scrollbars="none"
-        android:overScrollMode="never"
+
 
         >
-        <LinearLayout
-            android:orientation="vertical"
+
+        <android.support.v4.widget.SwipeRefreshLayout
+
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:id="@+id/swipe_parent"
+            >
+
+
+
+
+        <ScrollView
+            android:id="@+id/weather_layout_01"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <include layout="@layout/activity_title"/>
+            android:layout_height="match_parent"
+            android:scrollbars="none"
+            android:overScrollMode="never"
 
-            <include layout="@layout/activity_now"/>
+            >
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <include layout="@layout/activity_title"/>
 
-            <include layout="@layout/activity_forecast"/>
+                <include layout="@layout/activity_now"/>
 
-            <include layout="@layout/aqi"/>
+                <include layout="@layout/activity_forecast"/>
 
-            <include layout="@layout/suggestion"/>
+                <include layout="@layout/aqi"/>
 
-
-
-        </LinearLayout>
+                <include layout="@layout/suggestion"/>
 
 
 
-    </ScrollView>
+            </LinearLayout>
 
+
+
+        </ScrollView>
+       </android.support.v4.widget.SwipeRefreshLayout>]
+
+        <fragment
+            android:id="@id/choose_area_frament"
+            android:name="www.v_world.com.v_world_weather02.AreaFragmentActivity"
+            android:layout_width="match_parent"
+            android:layout_gravity="start"
+            android:layout_height="match_parent"
+
+           />
+    </android.support.v4.widget.DrawerLayout>
 </FrameLayout>
